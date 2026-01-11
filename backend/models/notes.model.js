@@ -1,0 +1,31 @@
+import mongoose from "mongoose";
+
+const noteSchema = new mongoose.Schema({
+    title:{
+        type:String,
+        required:true
+    },
+    content:{
+        type:String,
+        required:true
+    },
+    tags:{
+        type:[String],
+        required:true
+    },
+    isPinned:{
+        type:Boolean,
+        default:false
+    },
+    userId:{
+        type:String,
+        required:true
+    },
+    createdOn:{
+        type:String,
+        default:new Date().getTime()
+    }
+},{timestamps:true})
+
+const Note = mongoose.model('Note', noteSchema);
+export default Note
