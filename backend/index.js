@@ -50,6 +50,28 @@ app.post("/create-account", async(req, res)=>{
     }
 })
 
+app.post("/login", async(req, res)=>{
+    const {email, password} = req.body;
+    if(!email || !password){
+        return res.status(400).json({message:"Email and password and password are required!"});
+    }
+    try {
+        const user = await User.findOne({email});
+        if(!User){
+            return res.status(400).json({message:"User not found!"});
+        }
+        isMatch = await bcrypt.compare(password, user.password);
+        if(!isMatch){
+            return res.status(400).json({message:"Invalid Password!"})
+        }
+        accessToken = jwt.sign({userId:user._id}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:"7d"});
+        return res.status(200).json({message:"Login sucessfully!"})
+
+    } catch (error) {
+        return res.status(500).json({message:`Login error ${error}`});
+    }
+})
+
 //Start Server
 connectDB().then(()=>{
     app.listen(port, ()=>{
