@@ -1,11 +1,13 @@
 import jwt from 'jsonwebtoken'
+import dotenv from 'dotenv'
+dotenv.config();
 
 // validates a JWT Token
 //jwt.verify protects a route by checking if token is valid 
 
 function authenticateToken(req, res, next){
     const authHeader = req.header("authorization");
-    const token = authHeader && authHeader.split("")[1];
+    const token = authHeader && authHeader.split(" ")[1];
 
     if(!token) return res.sendStatus(401);
     

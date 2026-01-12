@@ -1,10 +1,13 @@
 import express from 'express'
 import dotenv from 'dotenv'
+import bcrypt from 'bcrypt'
+import jwt from 'jsonwebtoken'
 import cors from 'cors'
 import connectDB from './database/db.js';
 import User from './models/users.model.js';
+import authenticateToken from './utilities.js'
 
-dotenv.config();//
+dotenv.config();
 const port = process.env.PORT || 5000;
 const app = express();//instantiate express application
 
@@ -43,7 +46,8 @@ app.post("/create-account", async(req, res)=>{
         const accessToken = jwt.sign({userId:user._id}, process.env.ACCESS_TOKEN_SECRET,{expiresIn: "7d"});
 
         return res.status(201).json({
-            message:"Account created sucessfully"
+            message:"Account created sucessfully",
+            accessToken
         })
     } catch (error) {
         return res.status(500).json({message:`SignUp error ${error}`});
@@ -57,18 +61,42 @@ app.post("/login", async(req, res)=>{
     }
     try {
         const user = await User.findOne({email});
-        if(!User){
+        if(!user){
             return res.status(400).json({message:"User not found!"});
         }
-        isMatch = await bcrypt.compare(password, user.password);
+        const isMatch = await bcrypt.compare(password, user.password);
         if(!isMatch){
             return res.status(400).json({message:"Invalid Password!"})
         }
-        accessToken = jwt.sign({userId:user._id}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:"7d"});
-        return res.status(200).json({message:"Login sucessfully!"})
+        const accessToken = jwt.sign({userId:user._id}, process.env.ACCESS_TOKEN_SECRET,{expiresIn:"7d"});
+        return res.status(200).json({
+            message:"Login sucessfully!",
+            accessToken
+        })
 
     } catch (error) {
         return res.status(500).json({message:`Login error ${error}`});
+    }
+})
+
+app.get("/get-user", authenticateToken, async(req, res)=>{
+    try {
+        const user = await User.findById(req.user.userId);
+        if(!user){
+            return res.status(401).json({message:"User not found!"})
+        }
+
+        return res.json({
+            user:{
+                fullName:user.fullName,
+            email:user.email,
+            _id:user._id,
+            createdOn:user.createdOn
+            },
+            message:"Sucessfully got user data!"
+        })
+    } catch (error) {
+        return res.status(500).json({message:`Failed to get user ${error}`})
     }
 })
 
