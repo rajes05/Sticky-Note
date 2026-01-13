@@ -173,10 +173,27 @@ app.get("/get-all-notes", authenticateToken, async (req, res) => {
       notes,
     });
   } catch (error) {
-    return res.status(500).json({message:`Get all notes error ${error}`});
+    return res.status(500).json({ message: `Get all notes error ${error}` });
   }
 });
 
+app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
+  const noteId = req.params.noteId;
+  const userId = req.user.userId;
+  try {
+    const note = await Note.findOne({ _id: noteId, userId });
+    if (!note) {
+      return res.status(400).json({ message: "Note not found!" });
+    }
+    await Note.deleteOne({ _id: noteId });
+    return res.status(200).json({
+      message: "Note deleted sucessfully!",
+      note,
+    });
+  } catch (error) {
+    return res.status(500).json({ message: `Delete error ${error}` });
+  }
+});
 
 //Start Server
 connectDB().then(() => {
