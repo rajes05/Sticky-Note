@@ -6,6 +6,7 @@ import cors from 'cors'
 import connectDB from './database/db.js';
 import User from './models/users.model.js';
 import authenticateToken from './utilities.js'
+import Note from './models/notes.model.js'
 
 dotenv.config();
 const port = process.env.PORT || 5000;
@@ -97,6 +98,28 @@ app.get("/get-user", authenticateToken, async(req, res)=>{
         })
     } catch (error) {
         return res.status(500).json({message:`Failed to get user ${error}`})
+    }
+})
+
+app.post("/add-note", authenticateToken, async(req, res)=>{
+    const {title, content, tags} = req.body;
+    const userId = req.user.userId;
+
+    if(!title || !content){
+        return res.status(400).json({message:"Title and content are required!"});
+    }
+    try {
+        const note = new Note({ 
+            title, 
+            content, 
+            tags: tags || [], 
+            userId 
+        });
+        await note.save();
+
+        return res.status(201).json({message:"Notes added Sucessfully!"});
+    } catch (error) {
+        return res.status(500).json({message:`Add note error ${error}`})
     }
 })
 
