@@ -195,6 +195,29 @@ app.delete("/delete-note/:noteId", authenticateToken, async (req, res) => {
   }
 });
 
+app.put("/update-note-pinned/:noteId", authenticateToken, async(req, res)=>{
+    const {isPinned} = req.body;
+    const userId = req.user.userId;
+    const noteId = req.params.noteId;
+
+    try {
+        const note = await Note.findOne({_id:noteId, userId});
+        if(!note){
+            return res.status(400).json({message:"Note not found!"})
+        }
+        note.isPinned= !! isPinned; // negation force any value into boolean
+        await note.save();
+
+        return res.status(200).json({
+            message:"Pin status updated!",
+            note
+        })
+
+    } catch (error) {
+        return res.status(500).json({message:`Update pin status error ${error}`});
+    }
+})
+
 //Start Server
 connectDB().then(() => {
   app.listen(port, () => {
