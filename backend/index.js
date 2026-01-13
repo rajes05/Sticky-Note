@@ -216,11 +216,36 @@ app.put("/update-note-pinned/:noteId", authenticateToken, async(req, res)=>{
     } catch (error) {
         return res.status(500).json({message:`Update pin status error ${error}`});
     }
+});
+
+app.get("/search-notes", authenticateToken, async(req, res)=>{
+    const {query} = req.query;
+    const userId = req.user.userId;
+    if(!query){
+        return res.status(400).json({message:"Query is required!"})
+    }
+
+    try {
+        const notes = await Note.find({
+            userId,
+            $or: [
+                {title: {$regex: query, $options: "i"}},
+                {content: {$regex: query, $options: "i"}}
+            ]
+        })
+
+        return res.status(200).json({
+            message:"Matching notes found!", 
+            notes
+        })
+    } catch (error) {
+        return res.status(500).json({message:`Query error ${error}`})
+    }
 })
 
 //Start Server
 connectDB().then(() => {
   app.listen(port, () => {
-    console.log(`Server is running at port ${port}`);
+    console.log(`Server is running on http://localhost:${port}`);
   });
 });
