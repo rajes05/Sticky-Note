@@ -162,6 +162,22 @@ app.put("/edit-note/:noteId", authenticateToken, async (req, res) => {
   }
 });
 
+app.get("/get-all-notes", authenticateToken, async (req, res) => {
+  try {
+    const notes = await Note.find({ userId: req.user.userId }).sort({
+      isPinned: -1,
+    });
+
+    return res.status(200).json({
+      meassage: " All notes retrived sucessfully!",
+      notes,
+    });
+  } catch (error) {
+    return res.status(500).json({message:`Get all notes error ${error}`});
+  }
+});
+
+
 //Start Server
 connectDB().then(() => {
   app.listen(port, () => {
