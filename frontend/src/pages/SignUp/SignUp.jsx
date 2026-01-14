@@ -49,7 +49,7 @@ export default function SignUp() {
             if (error.response?.data?.message) {
                 setError(error.response.data.message);
             } else {
-                setError(error.response.data.message);
+                setError("An unexpected error occured. Please try apain.");
             }
         }
         finally {
@@ -156,6 +156,7 @@ export default function SignUp() {
 
                                     </div>
                 </div>
+                
             </div>
         </div>
     )
