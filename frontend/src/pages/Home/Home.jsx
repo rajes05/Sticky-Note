@@ -91,6 +91,30 @@ export default function Home() {
             setIsLoading(false)
         }
     }
+    const updateIsPinned = async(noteData)=>{
+        try {
+            const response = await axiosInstance.put(`update-note-pinned/${noteData._id}`,
+                {
+                    isPinned:!noteData.isPinned
+                }
+            );
+            if(response.data?.note){
+                getAllNotes();
+            }
+        } catch (error) {
+            console.log("Update pin error: ",error);
+        }
+    }
+
+    const handleClearSearch = ()=>{
+        setIsSearch(false);
+        getAllNotes();
+    }
+
+    useEffect(()=>{
+        getAllNotes();
+        getUserInfo();
+    }, [])
     return (
         <div>
             Home
